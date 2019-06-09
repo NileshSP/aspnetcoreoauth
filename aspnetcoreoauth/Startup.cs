@@ -49,8 +49,8 @@ namespace aspnetcoreoauth
             else
             {
                 logger.LogInformation($"Environment: {HostingEnvironment.EnvironmentName}");
-                _googleClientId = Environment.GetEnvironmentVariable("Authentication:Google:ClientId");
-                _googleClientSecret = Environment.GetEnvironmentVariable("Authentication:Google:ClientSecret");
+                _googleClientId = Environment.GetEnvironmentVariable("Authentication_Google_ClientId");
+                _googleClientSecret = Environment.GetEnvironmentVariable("Authentication_Google_ClientSecret");
                 logger.LogInformation($"Environment variables: Google - ClientId : {_googleClientId}, ClientSecret : {_googleClientSecret}");
             }
             services.Configure<CookiePolicyOptions>(options =>
