@@ -22,21 +22,37 @@ namespace sampleaspnet
     public class Startup
     {
         private static readonly WindsorContainer _container = new WindsorContainer();
+        private readonly ILoggerFactory _loggerFactory;
         private string _googleClientId = null;
         private string _googleClientSecret = null;
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment, ILoggerFactory loggerFactory)
         {
             Configuration = configuration;
+            HostingEnvironment = hostingEnvironment;
+            _loggerFactory = loggerFactory;
         }
 
         public IConfiguration Configuration { get; }
+        public IHostingEnvironment HostingEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            _googleClientId = Configuration["Authentication:Google:ClientId"];
-            _googleClientSecret = Configuration["Authentication:Google:ClientSecret"];
+            var logger = _loggerFactory.CreateLogger<Startup>();
 
+            if (HostingEnvironment.IsDevelopment())
+            {
+                logger.LogInformation("Development environment");
+                _googleClientId = Configuration["Authentication:Google:ClientId"];
+                _googleClientSecret = Configuration["Authentication:Google:ClientSecret"];
+            }
+            else
+            {
+                logger.LogInformation($"Environment: {HostingEnvironment.EnvironmentName}");
+                _googleClientId = Environment.GetEnvironmentVariable("Authentication:Google:ClientId");
+                _googleClientSecret = Environment.GetEnvironmentVariable("Authentication:Google:ClientSecret");
+                logger.LogInformation($"Environment variables: Google - ClientId : {_googleClientId}, ClientSecret : {_googleClientSecret}");
+            }
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
