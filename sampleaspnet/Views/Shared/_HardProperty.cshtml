@@ -1,0 +1,161 @@
+﻿@model sampleaspnet.Models.EThorTestEntity
+
+<fieldset>
+    <legend>HardProperty</legend>
+    <div class="form-group">
+        <div id="inputContainer" class="inputContainer">
+            <input type="text" id="myInput" placeholder="new input....">
+            <span onclick="newElement()" class="addBtn">Add</span>
+        </div>
+        <ul id="HardPropertyList"></ul>
+    </div>
+</fieldset>
+<script type="text/javascript">
+    let hardProperty = document.getElementById("HardProperty");
+    if (hardProperty !== null) {
+        let hardPropertyList = document.getElementById("HardPropertyList");
+        let propList = hardProperty.value.trim().split("|!#$|");
+        propList.forEach(item => { if (item.trim() !== '') addElement(item); });
+
+        function addElement(item) {
+            let listItem = document.createElement("LI");
+            let input = document.createElement("INPUT");
+            input.value = item;
+            input.readOnly = true;
+            input.onfocus = function () {
+                input.title = this.value;
+                this.readOnly = false;
+            }
+            input.onblur = function () {
+                let filterCount = hardProperty.value.trim()
+                    .split("|!#$|")
+                    .filter(e => e.trim() == this.value.trim())
+                if (filterCount.length === 0) {
+                    document.getElementById("HardProperty").value = hardProperty.value.trim().replace(input.title, this.value);
+                    this.readOnly = true;
+                }
+                else {
+                    this.value = input.title;
+                    this.readOnly = false;
+                }
+                input.title = "";
+            }
+            listItem.appendChild(input);
+
+            let span = document.createElement("SPAN");
+            let txt = document.createTextNode("\u00D7");
+            span.className = "close";
+            span.appendChild(txt);
+            span.onclick = function () {
+                let item = this.parentElement;
+                hardProperty.value = hardProperty.value.trim()
+                    .split("|!#$|")
+                    .filter(e => e !== this.parentElement.children[0].value)
+                    .join("|!#$|")
+                item.parentElement.removeChild(item);
+            }
+            listItem.appendChild(span);
+            hardPropertyList.appendChild(listItem);
+        }
+
+        function newElement() {
+            let inputValue = document.getElementById("myInput").value.trim();
+            let filterCount = hardProperty.value.trim()
+                .split("|!#$|")
+                .filter(e => e.trim() == inputValue.trim())
+            if (filterCount.length === 0) {
+                document.getElementById("HardProperty").value = hardProperty.value.trim() + (hardProperty.value.trim() !== '' ? "|!#$|" : "") + inputValue
+                addElement(inputValue);
+                document.getElementById("myInput").value = "";
+            }
+        }
+    }
+</script>
+<style>
+
+    fieldset {
+        display: block;
+        margin: 6px 0px;
+        padding: 14px;
+        border: 0.5px groove orange;
+        width: 100%;
+    }
+
+    legend {
+        display: block;
+        padding: 0px 5px;
+        border: 0px groove blue;
+        width: auto;
+        font-size: 120%;
+    }
+
+    .inputContainer {
+        display: grid;
+        grid-template-columns: 85% 15%;
+        grid-gap: 8px;
+    }
+
+    #HardPropertyList {
+        padding: 5px 0;
+        margin: 0;
+    }
+
+        #HardPropertyList > li {
+            cursor: pointer;
+            padding: 0px;
+            margin: 0px;
+            font-size: 18px;
+            transition: 0.2s;
+            list-style: none;
+            display: grid;
+            grid-template-columns: 85% 15%;
+            grid-gap: 8px;
+        }
+
+    #myInput {
+        outline: none;
+        border: none;
+        width: 100%;
+    }
+
+    #HardPropertyList > li > input {
+        margin: 0;
+        border: none;
+        border-radius: 0;
+        left: 0;
+        padding: 8px 0px;
+        font-size: 14px;
+        outline: none;
+    }
+
+        #HardPropertyList > li > input:focus {
+            outline: auto;
+        }
+
+    #HardPropertyList > li > span {
+        background-color: transparent;
+        text-align: center;
+        padding: 10px;
+        margin: 0px;
+    }
+
+        #HardPropertyList > li > span:hover {
+            background-color: #f44336;
+            color: white;
+        }
+
+    .addBtn {
+        padding: 5px 5px;
+        background: #d9d9d9;
+        color: #555;
+        text-align: center;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.3s;
+        border-radius: 0;
+    }
+
+        .addBtn:hover {
+            background-color: #bbb;
+        }
+</style>
