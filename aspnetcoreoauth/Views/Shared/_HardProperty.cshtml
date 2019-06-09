@@ -62,7 +62,7 @@
             let inputValue = document.getElementById("myInput").value.trim();
             let filterCount = hardProperty.value.trim()
                 .split("|!#$|")
-                .filter(e => e.trim() == inputValue.trim())
+                .filter(e => e.trim().toLowerCase() == inputValue.trim().toLowerCase())
             if (filterCount.length === 0) {
                 document.getElementById("HardProperty").value = hardProperty.value.trim() + (hardProperty.value.trim() !== '' ? "|!#$|" : "") + inputValue
                 addElement(inputValue);
