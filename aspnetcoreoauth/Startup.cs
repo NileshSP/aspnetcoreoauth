@@ -40,19 +40,6 @@ namespace aspnetcoreoauth
         {
             var logger = _loggerFactory.CreateLogger<Startup>();
 
-            if (HostingEnvironment.IsDevelopment())
-            {
-                logger.LogInformation("Development environment");
-                _googleClientId = Configuration["Authentication:Google:ClientId"];
-                _googleClientSecret = Configuration["Authentication:Google:ClientSecret"];
-            }
-            else
-            {
-                logger.LogInformation($"Environment: {HostingEnvironment.EnvironmentName}");
-                _googleClientId = Environment.GetEnvironmentVariable("Authentication_Google_ClientId");
-                _googleClientSecret = Environment.GetEnvironmentVariable("Authentication_Google_ClientSecret");
-                logger.LogInformation($"Environment variables: Google - ClientId : {_googleClientId}, ClientSecret : {_googleClientSecret}");
-            }
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -63,6 +50,22 @@ namespace aspnetcoreoauth
             services.AddDefaultIdentity<IdentityUser>()
                 .AddDefaultUI(UIFramework.Bootstrap4)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Get OAuth Google creds/secrets
+            var googleClientId = Configuration["OAuth:Google:ClientId"];
+            var googleClientSecret = Configuration["OAuth:Google:ClientSecret"];
+
+            logger.LogInformation($"Environment: {HostingEnvironment.EnvironmentName}");
+            if (HostingEnvironment.IsDevelopment())
+            {
+                _googleClientId = Configuration[googleClientId];
+                _googleClientSecret = Configuration[googleClientSecret];
+            }
+            else
+            {
+                _googleClientId = Environment.GetEnvironmentVariable(googleClientId);
+                _googleClientSecret = Environment.GetEnvironmentVariable(googleClientSecret);
+            }
 
             services.AddAuthentication()
                 .AddGoogle(options =>
