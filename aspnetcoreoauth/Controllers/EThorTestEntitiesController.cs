@@ -28,7 +28,7 @@ namespace aspnetcoreoauth.Controllers
             return View(await _service.GetEThorTestEntityList(e => e != null));
         }
 
-        // GET: EThorTestEntities/Details/5
+        // GET: EThorTestEntities/Details/1
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -66,7 +66,7 @@ namespace aspnetcoreoauth.Controllers
             return View(eThorTestEntity);
         }
 
-        // GET: EThorTestEntities/Edit/5
+        // GET: EThorTestEntities/Edit/1
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -82,7 +82,7 @@ namespace aspnetcoreoauth.Controllers
             return View(eThorTestEntity);
         }
 
-        // POST: EThorTestEntities/Edit/5
+        // POST: EThorTestEntities/Edit/1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -102,7 +102,7 @@ namespace aspnetcoreoauth.Controllers
             return View(eThorTestEntity);
         }
 
-        // GET: EThorTestEntities/Delete/5
+        // GET: EThorTestEntities/Delete/1
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -119,7 +119,7 @@ namespace aspnetcoreoauth.Controllers
             return View(eThorTestEntity);
         }
 
-        // POST: EThorTestEntities/Delete/5
+        // POST: EThorTestEntities/Delete/1
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
