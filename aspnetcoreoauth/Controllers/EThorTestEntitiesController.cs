@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using aspnetcoreoauth.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace aspnetcoreoauth.Controllers
 {
+    [Authorize]
     public class EThorTestEntitiesController : Controller
     {
         private readonly IEThorEntityService _service;
