@@ -22,6 +22,9 @@ using System.Threading.Tasks;
 using System.IO;
 using Microsoft.AspNetCore.Http.Internal;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Linq;
 
 namespace aspnetcoreoauth
 {
@@ -42,7 +45,7 @@ namespace aspnetcoreoauth
         public IHostingEnvironment HostingEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             // Setup component model contributors for making windsor services available to IServiceProvider
             _container.AddFacility<AspNetCoreFacility>(f => f.CrossWiresInto(services));
@@ -88,30 +91,17 @@ namespace aspnetcoreoauth
                 .AddDefaultUI(UIFramework.Bootstrap4)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            //services.AddTransient<IEThorEntityService, EThorEntityService>();
-
-            //services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
-
-            services.AddMvcCore(options =>
-                        {
-                            options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-                        })
+            services.AddMvc()
                         .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                         .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
 
-            //services.AddHttpContextAccessor();
-
-            //services.AddLogging((lb) => lb.AddConsole().AddDebug());
             //services.AddSingleton<FrameworkMiddleware>(); // Do this if you don't care about using Windsor to inject dependencies
 
             // Custom application component registrations, ordering is important here
             RegisterApplicationComponents(services);
 
             //return WindsorRegistrationHelper.CreateServiceProvider(_container, services);
-            return services.AddWindsor(_container,
-                                        opts => opts.UseEntryAssembly(typeof(HomeController).Assembly), // <- Recommended
-                                        () => services.BuildServiceProvider(validateScopes: false) // <- Optional
-                                    );
+            services.AddWindsor(_container);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -120,11 +110,16 @@ namespace aspnetcoreoauth
             // For making component registrations of middleware easier
             _container.GetFacility<AspNetCoreFacility>().RegistersMiddlewareInto(app);
 
-            // Add custom middleware, do this if your middleware uses DI from Windsor
-            _container.Register(Component.For<CustomLoggingMiddleware>()
-                                            .DependsOn(Dependency.OnValue<ILoggerFactory>(loggerFactory))
-                                            //.DependsOn(Dependency.OnValue<IHttpContextAccessor>(httpContextAccessor))
-                                            .LifestyleTransient().AsMiddleware());
+            // Controller middleware resolve dependant service type 1 
+            //var entityService = _container.Resolve<IEThorEntityService>();
+            //if (entityService != null)
+            //{
+            //    _container.Register(Component.For<ResolveControllerDependenciesMiddleware>()
+            //                                    .DependsOn(Dependency.OnValue<ILoggerFactory>(loggerFactory))
+            //                                    .DependsOn(Dependency.OnValue<IEThorEntityService>(entityService))
+            //                                    .LifestyleTransient()
+            //                                    .AsMiddleware());
+            //}
 
             // Add framework configured middleware, use this if you dont have any DI requirements
             //app.UseMiddleware<FrameworkMiddleware>();
@@ -147,6 +142,14 @@ namespace aspnetcoreoauth
 
             app.UseAuthentication();
 
+            // Controller middleware resolve dependant service type 2 
+            //app.Use(async(ctx,next) => 
+            //{
+            //    loggerFactory.LogInformation($"middleware to provide/resolve required dependent service for controller");
+            //    var eThorService = _container.Resolve<IEThorEntityService>(); //ctx.RequestServices.GetService<IEThorEntityService>();
+            //    await next();
+            //});
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -158,10 +161,9 @@ namespace aspnetcoreoauth
         private void RegisterApplicationComponents(IServiceCollection services)
         {
             var assemblyName = typeof(aspnetcoreoauth.Startup).Assembly.GetName().Name;
-            _container.Register(Component.For<IHttpContextAccessor>().ImplementedBy<HttpContextAccessor>());
             _container.Register(Component.For<IApplicationDBContext>().ImplementedBy<ApplicationDbContext>().LifestyleTransient().CrossWired());
-            _container.Register(Component.For<IEThorEntityService, EThorEntityService>().LifestyleTransient());
-            _container.Register(Classes.FromAssemblyNamed(assemblyName).Pick().If(p => p.Name.EndsWith("Controller")).LifestyleTransient());
+            _container.Register(Component.For<IEThorEntityService, EThorEntityService>().LifestyleTransient()); // Automatically resolves dependencies for controller
+            //_container.Register(Classes.FromAssemblyNamed(assemblyName).Pick().If(p => p.Name.EndsWith("Controller")).LifestyleTransient()); // Not required
         }
 
     }
@@ -177,23 +179,28 @@ namespace aspnetcoreoauth
         }
     }
 
-    // Example of some custom user-defined middleware component. Resolves types from Windsor.
-    public sealed class CustomLoggingMiddleware : IMiddleware
+    public sealed class ResolveControllerDependenciesMiddleware : IMiddleware
     {
-        private readonly ILogger<CustomLoggingMiddleware> _logger;
+        private readonly ILogger<ResolveControllerDependenciesMiddleware> _logger;
+        private readonly IEThorEntityService _service;
 
-        public CustomLoggingMiddleware(ILogger<CustomLoggingMiddleware> logger)
+        public ResolveControllerDependenciesMiddleware(ILogger<ResolveControllerDependenciesMiddleware> logger, IEThorEntityService service)
         {
             _logger = logger;
+            _service = service;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            await next(context);
+            _logger.LogInformation($"Resolve service middleware logging: started.... ");
 
-            var request = context.Request;
-            var response = context.Response;
-            _logger.LogInformation($"Custom Middleware logging: \nRequest: {request.Scheme} {request.Host}{request.Path} {request.QueryString} \nResponse code: {response.StatusCode} ");
+            await next(context);
+            //var request = context.Request;
+            //var response = context.Response;
+            //_logger.LogInformation($"Custom Middleware logging: \nRequest: {request.Scheme} {request.Host}{request.Path} {request.QueryString} \nResponse code: {response.StatusCode} ");
+            //_logger.LogInformation($"Custom Middleware logging: completed.... ");
+
+            _logger.LogInformation($"Resolve service middleware logging: completed.... ");
         }
     }
 }
