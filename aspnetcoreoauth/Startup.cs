@@ -257,7 +257,10 @@ namespace aspnetcoreoauth
             htmlDoc.LoadHtml(originalHtml);
             HtmlNode testNode = HtmlNode.CreateNode($"<div class='text-muted text-center small' style='width:100vw; position:absolute;z-index:5' >Response Time: {responseTime.ToString()} ms.</div>");
             var htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
-            htmlBody.InsertBefore(testNode, htmlBody.FirstChild);
+            if(htmlBody != null)
+            {
+                htmlBody.InsertBefore(testNode, htmlBody.FirstChild);
+            }
 
             string rawHtml = htmlDoc.DocumentNode.OuterHtml; //using this results in a page that displays my inserted HTML correctly, but duplicates the original page content.
                                                              //rawHtml = "some text"; uncommenting this results in a page with the correct format: this text, followed by the original contents of the page
