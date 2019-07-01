@@ -11,24 +11,24 @@ using Microsoft.AspNetCore.Authorization;
 namespace aspnetcoreoauth.Controllers
 {
     [Authorize]
-    public class EThorTestEntitiesController : Controller
+    public class SampleTestEntitiesController : Controller
     {
-        private readonly IEThorEntityService _service;
+        private readonly ISampleEntityService _service;
         private readonly ILogger<Controller> _logger;
-        public EThorTestEntitiesController(ILogger<Controller> logger, IEThorEntityService service)
+        public SampleTestEntitiesController(ILogger<Controller> logger, ISampleEntityService service)
         {
             _logger = logger;
             _service = service;
         }
 
-        // GET: EThorTestEntities
+        // GET: SampleTestEntities
         public async Task<IActionResult> Index()
         {
-            _logger?.LogInformation("List EThorTestEntities action called");
-            return View(await _service.GetEThorTestEntityList(e => e != null));
+            _logger?.LogInformation("List SampleTestEntities action called");
+            return View(await _service.GetSampleTestEntityList(e => e != null));
         }
 
-        // GET: EThorTestEntities/Details/1
+        // GET: SampleTestEntities/Details/1
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,37 +36,37 @@ namespace aspnetcoreoauth.Controllers
                 return NotFound();
             }
 
-            var eThorTestEntity = await _service.GetEThorTestEntity(id);
-            if (eThorTestEntity == null)
+            var SampleTestEntity = await _service.GetSampleTestEntity(id);
+            if (SampleTestEntity == null)
             {
                 return NotFound();
             }
 
-            return View(eThorTestEntity);
+            return View(SampleTestEntity);
         }
 
-        // GET: EThorTestEntities/Create
+        // GET: SampleTestEntities/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: EThorTestEntities/Create
+        // POST: SampleTestEntities/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,HardProperty")] EThorTestEntity eThorTestEntity)
+        public async Task<IActionResult> Create([Bind("Id,Name,HardProperty")] SampleTestEntity SampleTestEntity)
         {
             if (ModelState.IsValid)
             {
-                await _service.AddEThorTestEntity(eThorTestEntity);
+                await _service.AddSampleTestEntity(SampleTestEntity);
                 return RedirectToAction(nameof(Index));
             }
-            return View(eThorTestEntity);
+            return View(SampleTestEntity);
         }
 
-        // GET: EThorTestEntities/Edit/1
+        // GET: SampleTestEntities/Edit/1
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -74,35 +74,35 @@ namespace aspnetcoreoauth.Controllers
                 return NotFound();
             }
 
-            var eThorTestEntity = await _service.GetEThorTestEntity(id);
-            if (eThorTestEntity == null)
+            var SampleTestEntity = await _service.GetSampleTestEntity(id);
+            if (SampleTestEntity == null)
             {
                 return NotFound();
             }
-            return View(eThorTestEntity);
+            return View(SampleTestEntity);
         }
 
-        // POST: EThorTestEntities/Edit/1
+        // POST: SampleTestEntities/Edit/1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,HardProperty")] EThorTestEntity eThorTestEntity)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,HardProperty")] SampleTestEntity SampleTestEntity)
         {
-            if (id != eThorTestEntity.Id)
+            if (id != SampleTestEntity.Id)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                await _service.UpdateEThorTestEntity(eThorTestEntity);
+                await _service.UpdateSampleTestEntity(SampleTestEntity);
                 return RedirectToAction(nameof(Index));
             }
-            return View(eThorTestEntity);
+            return View(SampleTestEntity);
         }
 
-        // GET: EThorTestEntities/Delete/1
+        // GET: SampleTestEntities/Delete/1
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -110,21 +110,21 @@ namespace aspnetcoreoauth.Controllers
                 return NotFound();
             }
 
-            var eThorTestEntity = await _service.GetEThorTestEntity(id);
-            if (eThorTestEntity == null)
+            var SampleTestEntity = await _service.GetSampleTestEntity(id);
+            if (SampleTestEntity == null)
             {
                 return NotFound();
             }
 
-            return View(eThorTestEntity);
+            return View(SampleTestEntity);
         }
 
-        // POST: EThorTestEntities/Delete/1
+        // POST: SampleTestEntities/Delete/1
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _service.DeleteEThorTestEntity(id);
+            await _service.DeleteSampleTestEntity(id);
             return RedirectToAction(nameof(Index));
         }
 

@@ -14,11 +14,11 @@ using System.Reflection;
 
 namespace aspnetcoreoauth.Tests
 {
-    public class EThorEntityTests
+    public class SampleEntityTests
     {
-        private EThorTestEntitiesController _eThorEntitiesController;
+        private SampleTestEntitiesController _SampleEntitiesController;
         private IApplicationDBContext _applicationDBContext;
-        private IEThorEntityService _eThorEntityService;
+        private ISampleEntityService _SampleEntityService;
 
         [SetUp]
         public void Setup()
@@ -28,13 +28,13 @@ namespace aspnetcoreoauth.Tests
             //services.AddTransient<IConfiguration>(provider => PopulateTestData.GetConfiguration(TestContext.CurrentContext.TestDirectory));
             services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase());
             services.AddTransient<IApplicationDBContext, ApplicationDbContext>();
-            //services.AddTransient<IEThorEntityService, EThorEntityService>();
-            //services.AddTransient<EThorTestEntitiesController>();
+            //services.AddTransient<ISampleEntityService, SampleEntityService>();
+            //services.AddTransient<SampleTestEntitiesController>();
 
             //var serviceProvider = services.BuildServiceProvider();
             //_applicationDBContext = serviceProvider.GetService<IApplicationDBContext>();
-            //_eThorEntityService = serviceProvider.GetService<IEThorEntityService>();
-            //_eThorEntitiesController = serviceProvider.GetService<EThorTestEntitiesController>();
+            //_SampleEntityService = serviceProvider.GetService<ISampleEntityService>();
+            //_SampleEntitiesController = serviceProvider.GetService<SampleTestEntitiesController>();
 
 
             var container = new WindsorContainer();
@@ -42,7 +42,7 @@ namespace aspnetcoreoauth.Tests
             container.Register(Component.For<IApplicationDBContext, ApplicationDbContext>().LifestyleTransient());
             container
                 .Register(
-                    Component.For<IEThorEntityService, EThorEntityService>()
+                    Component.For<ISampleEntityService, SampleEntityService>()
                     .LifestyleTransient());
             container
                 .Register(
@@ -51,65 +51,65 @@ namespace aspnetcoreoauth.Tests
 
             var serviceProvider = WindsorRegistrationHelper.CreateServiceProvider(container, services);
             _applicationDBContext = container.Resolve<IApplicationDBContext>();
-            _eThorEntitiesController = container.Resolve<EThorTestEntitiesController>();
-            _eThorEntityService = container.Resolve<IEThorEntityService>();
+            _SampleEntitiesController = container.Resolve<SampleTestEntitiesController>();
+            _SampleEntityService = container.Resolve<ISampleEntityService>();
         }
 
         [Test, Order(1)]
         public void Check_for_resolved_dependencies()
         {
             Assert.IsNotNull(_applicationDBContext);
-            Assert.IsNotNull(_eThorEntityService);
-            Assert.IsNotNull(_eThorEntitiesController);
+            Assert.IsNotNull(_SampleEntityService);
+            Assert.IsNotNull(_SampleEntitiesController);
         }
 
         [Test, Order(2)]
-        public void Add_EThorTestEntity()
+        public void Add_SampleTestEntity()
         {
-            var newEntity = new EThorTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
-            int? returnId =  _eThorEntityService.AddEThorTestEntity(newEntity).GetAwaiter().GetResult();
+            var newEntity = new SampleTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
+            int? returnId =  _SampleEntityService.AddSampleTestEntity(newEntity).GetAwaiter().GetResult();
 
             Assert.IsNotNull(returnId, "Entity was not added");
             Assert.Greater(returnId,0, "Entity count was not updated");
         }
 
         [Test, Order(3)]
-        public void Get_EThorTestEntity()
+        public void Get_SampleTestEntity()
         {
-            var newEntity = new EThorTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
-            int? returnId = _eThorEntityService.AddEThorTestEntity(newEntity).GetAwaiter().GetResult();
+            var newEntity = new SampleTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
+            int? returnId = _SampleEntityService.AddSampleTestEntity(newEntity).GetAwaiter().GetResult();
             Assert.IsNotNull(returnId, "Entity was not added");
 
-            var result = _eThorEntityService.GetEThorTestEntity(1).GetAwaiter().GetResult();
+            var result = _SampleEntityService.GetSampleTestEntity(1).GetAwaiter().GetResult();
             Assert.IsNotNull(result, "Entity was not avaialable and resulted as null");
-            Assert.IsInstanceOf<EThorTestEntity>(result, "Entity is not of type EThorTestEntity");
+            Assert.IsInstanceOf<SampleTestEntity>(result, "Entity is not of type SampleTestEntity");
         }
 
         [Test, Order(4)]
-        public void Update_EThorTestEntity()
+        public void Update_SampleTestEntity()
         {
-            var newEntity = new EThorTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
-            int? returnId = _eThorEntityService.AddEThorTestEntity(newEntity).GetAwaiter().GetResult();
+            var newEntity = new SampleTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
+            int? returnId = _SampleEntityService.AddSampleTestEntity(newEntity).GetAwaiter().GetResult();
             Assert.IsNotNull(returnId, "Addition of entity caused error");
 
             newEntity.HardProperty = new string[] { "testA", "testB", "testC" };
-            int? returnUpdateId = _eThorEntityService.UpdateEThorTestEntity(newEntity).GetAwaiter().GetResult();
+            int? returnUpdateId = _SampleEntityService.UpdateSampleTestEntity(newEntity).GetAwaiter().GetResult();
             Assert.IsNotNull(returnUpdateId, "Entity could not be updated");
             Assert.Greater(returnUpdateId, 0, "Entity update count was not as expected");
 
-            var resultEntity = _eThorEntityService.GetEThorTestEntity(1).GetAwaiter().GetResult();
+            var resultEntity = _SampleEntityService.GetSampleTestEntity(1).GetAwaiter().GetResult();
             Assert.IsNotNull(resultEntity, "Entity was not avaialable and resulted as null");
             Assert.AreEqual(resultEntity.HardProperty.Count(),3, "HardProperty item count was not as expected");
         }
 
         [Test, Order(5)]
-        public void Delete_EThorTestEntity()
+        public void Delete_SampleTestEntity()
         {
-            var newEntity = new EThorTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
-            int? returnId = _eThorEntityService.AddEThorTestEntity(newEntity).GetAwaiter().GetResult();
+            var newEntity = new SampleTestEntity() { Name = "test entity", HardProperty = new string[] { "testA", "testB" } };
+            int? returnId = _SampleEntityService.AddSampleTestEntity(newEntity).GetAwaiter().GetResult();
             Assert.IsNotNull(returnId, "Addition of entity caused error");
 
-            var result = _eThorEntityService.DeleteEThorTestEntity(newEntity.Id).GetAwaiter().GetResult();
+            var result = _SampleEntityService.DeleteSampleTestEntity(newEntity.Id).GetAwaiter().GetResult();
             Assert.IsNotNull(result, "Entity could not be deleted");
             Assert.Greater(result, 0, "Entity deletion was not as expected");
         }
@@ -117,15 +117,15 @@ namespace aspnetcoreoauth.Tests
         [Test, Order(6)]
         public void GetAll_TestEntity()
         {
-            var newEntity1 = new EThorTestEntity() { Name = "test entity 1", HardProperty = new string[] { "test1A", "test1B" } };
-            int? returnId1 = _eThorEntityService.AddEThorTestEntity(newEntity1).GetAwaiter().GetResult();
+            var newEntity1 = new SampleTestEntity() { Name = "test entity 1", HardProperty = new string[] { "test1A", "test1B" } };
+            int? returnId1 = _SampleEntityService.AddSampleTestEntity(newEntity1).GetAwaiter().GetResult();
             Assert.IsNotNull(returnId1, "Addition of 2nd entity caused error");
 
-            var newEntity2 = new EThorTestEntity() { Name = "test entity 2", HardProperty = new string[] { "test2A", "test2B" } };
-            int? returnId2 = _eThorEntityService.AddEThorTestEntity(newEntity2).GetAwaiter().GetResult();
+            var newEntity2 = new SampleTestEntity() { Name = "test entity 2", HardProperty = new string[] { "test2A", "test2B" } };
+            int? returnId2 = _SampleEntityService.AddSampleTestEntity(newEntity2).GetAwaiter().GetResult();
             Assert.IsNotNull(returnId2, "Addition of 2nd entity caused error");
 
-            var result = _eThorEntityService.GetEThorTestEntityList(e => e.Id != null).GetAwaiter().GetResult();
+            var result = _SampleEntityService.GetSampleTestEntityList(e => e.Id != null).GetAwaiter().GetResult();
             Assert.IsNotNull(result, "Entity list was not available");
             Assert.AreEqual(result.Count, 2, "Entity list was not as expected");
         }

@@ -17,12 +17,12 @@ namespace aspnetcoreoauth.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<EThorTestEntity>()
+            builder.Entity<SampleTestEntity>()
                     .Property(e => e.HardProperty)
                     .HasConversion(v => string.Join("|!#$|", v), v => v.Split("|!#$|", StringSplitOptions.RemoveEmptyEntries));
         }
 
-        public DbSet<EThorTestEntity> EThorTestEntity { get; set; }
+        public DbSet<SampleTestEntity> SampleTestEntity { get; set; }
         public DbContext DatabaseContext { get { return ((DbContext)this); } }
     }
 }

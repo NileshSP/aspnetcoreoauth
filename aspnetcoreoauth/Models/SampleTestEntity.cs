@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace aspnetcoreoauth.Models
 {
-    public class EThorTestEntity
+    public class SampleTestEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -14,9 +14,9 @@ namespace aspnetcoreoauth.Models
         public string[] HardProperty { get; set; }
     }
 
-    public class EThorTestEntityValidator : AbstractValidator<EThorTestEntity>
+    public class SampleTestEntityValidator : AbstractValidator<SampleTestEntity>
     {
-        public EThorTestEntityValidator(IApplicationDBContext context)
+        public SampleTestEntityValidator(IApplicationDBContext context)
         {
             int entityId = 0;
             CascadeMode = CascadeMode.StopOnFirstFailure;
@@ -29,7 +29,7 @@ namespace aspnetcoreoauth.Models
                     .NotEmpty().WithMessage("Name is required")
                     .MustAsync(async (name, cancellation)
                                     => !((await context
-                                            .EThorTestEntity
+                                            .SampleTestEntity
                                             .Where(t => (entityId > 0 && t.Id != entityId && t.Name.ToLower().Trim() == name.ToLower().Trim()) // while updating exiting entity
                                                         || (entityId == 0 && t.Name.ToLower().Trim() == name.ToLower().Trim())) // while adding new entity
                                             .ToAsyncEnumerable().Count()

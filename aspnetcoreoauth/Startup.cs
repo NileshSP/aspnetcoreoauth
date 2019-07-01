@@ -25,6 +25,8 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Linq;
+using System.Diagnostics;
+using HtmlAgilityPack;
 
 namespace aspnetcoreoauth
 {
@@ -111,12 +113,12 @@ namespace aspnetcoreoauth
             _container.GetFacility<AspNetCoreFacility>().RegistersMiddlewareInto(app);
 
             // Controller middleware resolve dependant service type 1 
-            //var entityService = _container.Resolve<IEThorEntityService>();
+            //var entityService = _container.Resolve<ISampleEntityService>();
             //if (entityService != null)
             //{
             //    _container.Register(Component.For<ResolveControllerDependenciesMiddleware>()
             //                                    .DependsOn(Dependency.OnValue<ILoggerFactory>(loggerFactory))
-            //                                    .DependsOn(Dependency.OnValue<IEThorEntityService>(entityService))
+            //                                    .DependsOn(Dependency.OnValue<ISampleEntityService>(entityService))
             //                                    .LifestyleTransient()
             //                                    .AsMiddleware());
             //}
@@ -142,11 +144,13 @@ namespace aspnetcoreoauth
 
             app.UseAuthentication();
 
+            app.UseMiddleware<ResponseMeasurementMiddleware>();
+
             // Controller middleware resolve dependant service type 2 
             //app.Use(async(ctx,next) => 
             //{
             //    loggerFactory.LogInformation($"middleware to provide/resolve required dependent service for controller");
-            //    var eThorService = _container.Resolve<IEThorEntityService>(); //ctx.RequestServices.GetService<IEThorEntityService>();
+            //    var SampleService = _container.Resolve<ISampleEntityService>(); //ctx.RequestServices.GetService<ISampleEntityService>();
             //    await next();
             //});
 
@@ -162,7 +166,7 @@ namespace aspnetcoreoauth
         {
             var assemblyName = typeof(aspnetcoreoauth.Startup).Assembly.GetName().Name;
             _container.Register(Component.For<IApplicationDBContext>().ImplementedBy<ApplicationDbContext>().LifestyleTransient().CrossWired());
-            _container.Register(Component.For<IEThorEntityService, EThorEntityService>().LifestyleTransient()); // Automatically resolves dependencies for controller
+            _container.Register(Component.For<ISampleEntityService, SampleEntityService>().LifestyleTransient()); // Automatically resolves dependencies for controller
             //_container.Register(Classes.FromAssemblyNamed(assemblyName).Pick().If(p => p.Name.EndsWith("Controller")).LifestyleTransient()); // Not required
         }
 
@@ -182,9 +186,9 @@ namespace aspnetcoreoauth
     public sealed class ResolveControllerDependenciesMiddleware : IMiddleware
     {
         private readonly ILogger<ResolveControllerDependenciesMiddleware> _logger;
-        private readonly IEThorEntityService _service;
+        private readonly ISampleEntityService _service;
 
-        public ResolveControllerDependenciesMiddleware(ILogger<ResolveControllerDependenciesMiddleware> logger, IEThorEntityService service)
+        public ResolveControllerDependenciesMiddleware(ILogger<ResolveControllerDependenciesMiddleware> logger, ISampleEntityService service)
         {
             _logger = logger;
             _service = service;
@@ -201,6 +205,62 @@ namespace aspnetcoreoauth
             //_logger.LogInformation($"Custom Middleware logging: completed.... ");
 
             _logger.LogInformation($"Resolve service middleware logging: completed.... ");
+        }
+    }
+
+    public class ResponseMeasurementMiddleware
+    {
+        private readonly RequestDelegate _next;
+
+        public ResponseMeasurementMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
+
+        public async Task Invoke(HttpContext context)
+        {
+            var originalBody = context.Response.Body;
+            var newBody = new MemoryStream();
+            context.Response.Body = newBody;
+
+            var watch = new Stopwatch();
+            long responseTime = 0;
+            watch.Start();
+            await _next(context);
+            //// read the new body
+            // read the new body
+            responseTime = watch.ElapsedMilliseconds;
+            newBody.Position = 0;
+            var newContent = await new StreamReader(newBody).ReadToEndAsync();
+            // calculate the updated html
+            var updatedHtml = CreateDataNode(newContent, responseTime);
+            // set the body = updated html
+            var updatedStream = GenerateStreamFromString(updatedHtml);
+            await updatedStream.CopyToAsync(originalBody);
+            context.Response.Body = originalBody;
+
+        }
+        public static Stream GenerateStreamFromString(string s)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
+        }
+        private string CreateDataNode(string originalHtml, long responseTime)
+        {
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(originalHtml);
+            HtmlNode testNode = HtmlNode.CreateNode($"<div class='text-muted text-center small' style='width:100vw; position:absolute;z-index:5' >Response Time: {responseTime.ToString()} ms.</div>");
+            var htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
+            htmlBody.InsertBefore(testNode, htmlBody.FirstChild);
+
+            string rawHtml = htmlDoc.DocumentNode.OuterHtml; //using this results in a page that displays my inserted HTML correctly, but duplicates the original page content.
+                                                             //rawHtml = "some text"; uncommenting this results in a page with the correct format: this text, followed by the original contents of the page
+
+            return rawHtml;
         }
     }
 }
