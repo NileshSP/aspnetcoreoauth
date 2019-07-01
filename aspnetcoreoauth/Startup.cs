@@ -144,7 +144,9 @@ namespace aspnetcoreoauth
 
             app.UseAuthentication();
 
-            app.UseMiddleware<ResponseMeasurementMiddleware>();
+            app.UseWhen(context => !context.Request.Path.StartsWithSegments("/Identity"), appBuilder => {
+                appBuilder.UseMiddleware<ResponseMeasurementMiddleware>();
+            });
 
             // Controller middleware resolve dependant service type 2 
             //app.Use(async(ctx,next) => 
@@ -217,7 +219,7 @@ namespace aspnetcoreoauth
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             var originalBody = context.Response.Body;
             var newBody = new MemoryStream();
