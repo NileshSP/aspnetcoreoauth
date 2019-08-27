@@ -45,4 +45,4 @@ Once the project is build and run, a browser page would be presented with naviga
 >2. aspnetcoreoauthTests folder: unit tests for Web Api Endpoints
 >3. aspnetcoreoauth.sln solution file
 >4. Readme.md file for project information
-
+>5. aspnetcore.yml for CI/CD using github actions
